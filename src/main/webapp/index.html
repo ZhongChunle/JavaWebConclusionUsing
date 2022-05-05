@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>登录</title>
+    <link rel="stylesheet" href="css/index.css">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="element-ui/lib/theme-chalk/index.css">
+</head>
+<body>
+<canvas class="cavs" width="1575" height="1337"></canvas>
+
+<div class="loginmain" id="app">
+    <div class="login-title">
+        <span>管理员登录</span>
+    </div>
+
+    <div class="login-con">
+        <div class="login-user">
+            <div class="icon">
+                <img src="image/cd-icon-username.png" alt="">
+            </div>
+            <input type="text" v-model="username" name="usernem" placeholder="用户名" autocomplete="off" v-on:keyup.13="submit">
+        </div>
+        <div class="login-pwd">
+            <div class="icon">
+                <img src="image/cd-icon-password.png" alt="">
+            </div>
+            <input type="password" v-model="password" name="pwd" placeholder="密码" autocomplete="off" v-on:keyup.13="submit">
+        </div>
+        <div class="login-yan">
+            <div class="icon">
+                <img src="image/yan.png" alt="">
+            </div>
+            <input type="text" v-model="validCode" name="validCode" placeholder="验证码" autocomplete="off" v-on:keyup.13="submit">
+            <img src="http://localhost:8080/JavaWebConclusionUsing/test/CheckCodeServlet" alt="验证码" width="100" height="50"
+            style="position: absolute;right: 0px;">
+        </div>
+        <div class="login-btn">
+            <input type="button" value="登录" @click="login">
+        </div>
+    </div>
+
+</div>
+<script src="js/jquery-1.7.2.js"></script>
+<script src="js/ban.js"></script>
+<!--vue框架-->
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+<script src="element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="js/axios-0.18.0.js"></script>
+
+<script>
+    new Vue({
+        el:'#app',
+        // 初始化数据
+        data:{
+            // 标签上通过 v-model="模型" 绑定模型名称，可以获取到值
+            username:'', // 登录名
+            password:'', // 登录密码
+            validCode:'', // 验证码
+            message:'' // 返回信息
+        },
+        // 具体的业务方法
+        methods:{
+            // 点击登录事件
+            login(){
+                // 判断各项数据是否齐全[需要用到elemeng组件库]
+                if(this.username == '') return this.$message.error('请输入手机号');
+                if(this.password == '') return this.$message.error('请输入密码');
+                if(this.validCode == '') return this.$message.error('请输入验证码');
+
+                // 调用axios框架请求服务器
+                axios.post('http://localhost:8080/JavaWebConclusionUsing/test/login',{
+                    teacherName: this.username,
+                    password: this.password,
+                    validCode: this.validCode,
+                }).then((res) => {
+                    // 返回处理
+                    if (res.data == 'succeed'){
+                        // 跳转首页
+                        window.location.replace("http://localhost:8080/JavaWebConclusionUsing/Student.html")
+                        // 请求页面的所有数据
+                        localStorage.clear();
+                    }else {
+                        Vue.prototype.$message.error(res.data);
+                        // 清空验证码模型
+                        this.validCode = '';
+                        // 调用切换验证码方法
+                        this.ValidateCode();
+                    }
+                });
+            },
+            // 键盘回车事件调用：v-on:keyup.13=“submit”
+            submit(){
+                this.login();
+            },
+            // 验证码点击切换事件
+            ValidateCode: function () {
+                this.home_url = '/Main/ValideCode?ts=' + new Date().getTime();
+            }
+        }
+    });
+</script>
+</body>
+</html>
